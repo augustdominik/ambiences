@@ -10,21 +10,21 @@ function App() {
       name: 'Sizzling Lasagna',
       src: `${baseUrl}sounds/sizzling_lasagna.WAV`,
       date: 'January 30, 2026',
-      place: 'Odense'
+      place: 'Odense, Denmark'
     },
     {
       id: 2,
       name: 'Odense Å 1',
       src: `${baseUrl}sounds/odense_aa1_cleaned.WAV`,
       date: 'January 30, 2026',
-      place: 'Odense'
+      place: 'Odense, Denmark'
     },
     {
       id: 3,
       name: 'Odense Å 2',
       src: `${baseUrl}sounds/odense_aa2_cleaned.WAV`,
       date: 'January 30, 2026',
-      place: 'Odense'
+      place: 'Odense, Denmark'
     },
   ];
 
