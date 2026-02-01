@@ -142,7 +142,18 @@ export default function SoundPlayer({ name, audioSrc, date, place }) {
           className="play-button"
           disabled={isLoading}
         >
-          {isLoading ? <div className="spinner"></div> : isPlaying ? '⏸' : '▶'}
+          {isLoading ? (
+            <div className="spinner"></div>
+          ) : isPlaying ? (
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <rect x="4" y="3" width="4" height="14" fill="currentColor" />
+              <rect x="12" y="3" width="4" height="14" fill="currentColor" />
+            </svg>
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M5 3L17 10L5 17V3Z" fill="currentColor" />
+            </svg>
+          )}
         </button>
 
         <div className="volume-control">

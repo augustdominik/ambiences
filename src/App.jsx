@@ -32,7 +32,7 @@ function App() {
     <div className="app">
       <header>
         <h1>August's Sizzling Sounds</h1>
-        <p>recorded with love</p>
+        <p>a diary of sounds - recorded with love</p>
       </header>
       <div className="sound-grid">
         {sounds.map((sound) => (

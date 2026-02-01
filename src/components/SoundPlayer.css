@@ -36,13 +36,17 @@
   border: 2px solid #8c8273;
   background: #181a1b;
   color: #e8e6e3;
-  font-size: 24px;
   cursor: pointer;
   transition: transform 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  padding: 0;
+}
+
+.play-button svg {
+  display: block;
 }
 
 .play-button:hover {
