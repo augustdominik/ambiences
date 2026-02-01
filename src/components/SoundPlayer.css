@@ -1,0 +1,50 @@
+.sound-player {
+  background: white;
+  border: 2px solid black;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 10px;
+  color: black;
+  min-width: 250px;
+}
+
+.sound-player h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.2em;
+}
+
+.play-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid black;
+  background: white;
+  color: black;
+  font-size: 24px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  margin-bottom: 15px;
+}
+
+.play-button:hover {
+  transform: scale(1.1);
+}
+
+.play-button:active {
+  transform: scale(0.95);
+}
+
+.volume-control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.volume-control label {
+  font-size: 0.9em;
+}
+
+.volume-control input[type="range"] {
+  width: 100%;
+  cursor: pointer;
+}
