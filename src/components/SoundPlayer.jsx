@@ -130,7 +130,7 @@ export default function SoundPlayer({ name, audioSrc }) {
         className="play-button"
         disabled={isLoading}
       >
-        {isLoading ? '⏳' : isPlaying ? '⏸' : '▶'}
+        {isLoading ? <div className="spinner"></div> : isPlaying ? '⏸' : '▶'}
       </button>
 
       <div className="volume-control">
