@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import './SoundPlayer.css';
 
-export default function SoundPlayer({ name, audioSrc }) {
+export default function SoundPlayer({ name, audioSrc, date, place }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5);
   const [isLoading, setIsLoading] = useState(false);
@@ -130,25 +130,32 @@ export default function SoundPlayer({ name, audioSrc }) {
   return (
     <div className="sound-player">
       <h3>{name}</h3>
+      <div className="metadata">
+        <span>{date}</span>
+        <span className="separator">•</span>
+        <span>{place}</span>
+      </div>
 
-      <button
-        onClick={togglePlay}
-        className="play-button"
-        disabled={isLoading}
-      >
-        {isLoading ? <div className="spinner"></div> : isPlaying ? '⏸' : '▶'}
-      </button>
+      <div className="controls">
+        <button
+          onClick={togglePlay}
+          className="play-button"
+          disabled={isLoading}
+        >
+          {isLoading ? <div className="spinner"></div> : isPlaying ? '⏸' : '▶'}
+        </button>
 
-      <div className="volume-control">
-        <label>Volume: {Math.round(volume * 100)}%</label>
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={volume}
-          onChange={handleVolumeChange}
-        />
+        <div className="volume-control">
+          <label>Volume: {Math.round(volume * 100)}%</label>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={handleVolumeChange}
+          />
+        </div>
       </div>
     </div>
   );

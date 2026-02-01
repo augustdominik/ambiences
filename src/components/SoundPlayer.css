@@ -9,8 +9,24 @@
 }
 
 .sound-player h3 {
-  margin: 0 0 15px 0;
+  margin: 0 0 8px 0;
   font-size: 1.2em;
+}
+
+.metadata {
+  font-size: 0.85em;
+  color: #8c8273;
+  margin-bottom: 15px;
+}
+
+.metadata .separator {
+  margin: 0 8px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .play-button {
@@ -23,10 +39,10 @@
   font-size: 24px;
   cursor: pointer;
   transition: transform 0.2s;
-  margin-bottom: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .play-button:hover {
@@ -60,6 +76,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1;
 }
 
 .volume-control label {
