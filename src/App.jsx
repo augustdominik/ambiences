@@ -3,7 +3,7 @@ import './App.css'
 
 function App() {
   const baseUrl = import.meta.env.BASE_URL;
-  
+
   const sounds = [
     { id: 1, name: 'Sizzling Lasagna', src: `${baseUrl}sounds/sizzling_lasagna.WAV` },
     { id: 2, name: 'Odense Å 1', src: `${baseUrl}sounds/odense_aa1_cleaned.WAV` },
@@ -13,7 +13,7 @@ function App() {
   return (
     <div className="app">
       <header>
-        <h1>Zehong Ambience</h1>
+        <h1>Sizzling Ambiences</h1>
         <p>recorded with love</p>
       </header>
       <div className="sound-grid">
