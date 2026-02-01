@@ -13,7 +13,7 @@ function App() {
   return (
     <div className="app">
       <header>
-        <h1>Zehong Ambiences</h1>
+        <h1>Sizzling Sounds</h1>
         <p>recorded with love</p>
       </header>
       <div className="sound-grid">
