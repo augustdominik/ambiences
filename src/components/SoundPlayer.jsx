@@ -13,12 +13,6 @@ export default function SoundPlayer({ name, audioSrc }) {
 
   const FADE_TIME = 2.5; // seconds
 
-  // Convert linear slider value to logarithmic gain value
-  const linearToLog = (value) => {
-    // Using exponential curve: value^2 for more natural perception
-    return value * value;
-  };
-
   useEffect(() => {
     audioContextRef.current =
       new (window.AudioContext || window.webkitAudioContext)();
@@ -75,7 +69,7 @@ export default function SoundPlayer({ name, audioSrc }) {
     gainNodeRef.current.gain.cancelScheduledValues(now);
     gainNodeRef.current.gain.setValueAtTime(0, now);
     gainNodeRef.current.gain.linearRampToValueAtTime(
-      linearToLog(volume),
+      volume,
       now + FADE_TIME
     );
 
@@ -120,7 +114,7 @@ export default function SoundPlayer({ name, audioSrc }) {
 
     if (gainNodeRef.current && isPlaying) {
       gainNodeRef.current.gain.setTargetAtTime(
-        linearToLog(newVolume),
+        newVolume,
         audioContextRef.current.currentTime,
         0.05
       );
