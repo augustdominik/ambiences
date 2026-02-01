@@ -31,7 +31,7 @@ function App() {
   return (
     <div className="app">
       <header>
-        <h1>August's Sizzling Sounds</h1>
+        <h1>August's Ambiences</h1>
         <p>a diary of sounds - recorded with love</p>
       </header>
       <div className="sound-grid">
