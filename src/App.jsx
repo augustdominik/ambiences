@@ -2,11 +2,12 @@ import SoundPlayer from './components/SoundPlayer'
 import './App.css'
 
 function App() {
-  // Example sounds - replace these paths with your actual audio files
+  const baseUrl = import.meta.env.BASE_URL;
+  
   const sounds = [
-    { id: 1, name: 'Sizzling Lasagna', src: '/sounds/sizzling_lasagna.WAV' },
-    { id: 2, name: 'Odense Å 1', src: '/sounds/odense_aa1_cleaned.WAV' },
-    { id: 3, name: 'Odense Å 2', src: '/sounds/odense_aa2_cleaned.WAV' },
+    { id: 1, name: 'Sizzling Lasagna', src: `${baseUrl}sounds/sizzling_lasagna.WAV` },
+    { id: 2, name: 'Odense Å 1', src: `${baseUrl}sounds/odense_aa1_cleaned.WAV` },
+    { id: 3, name: 'Odense Å 2', src: `${baseUrl}sounds/odense_aa2_cleaned.WAV` },
   ];
 
   return (
