@@ -1,4 +1,5 @@
 import SoundPlayer from './components/SoundPlayer'
+import Newsletter from './components/Newsletter'
 import './App.css'
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
           />
         ))}
       </div>
+      <Newsletter />
     </div>
   )
 }
