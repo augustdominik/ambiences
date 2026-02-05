@@ -30,6 +30,7 @@
 .newsletter-input {
   flex: 1;
   min-width: 200px;
+  max-width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
@@ -37,6 +38,7 @@
   color: #fff;
   font-size: 1rem;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .newsletter-input:focus {
@@ -94,6 +96,11 @@
   }
   
   .newsletter-input {
+    width: 100%;
+    min-width: 0;
+  }
+  
+  .newsletter-button {
     width: 100%;
   }
 }
