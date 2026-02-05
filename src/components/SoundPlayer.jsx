@@ -5,6 +5,8 @@ export default function SoundPlayer({ name, audioSrc, date, place }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const audioContextRef = useRef(null);
   const audioBufferRef = useRef(null);
@@ -27,8 +29,6 @@ export default function SoundPlayer({ name, audioSrc, date, place }) {
     gainNodeRef.current.gain.value = 0;
     gainNodeRef.current.connect(audioContextRef.current.destination);
 
-    loadAudio();
-
     return () => {
       if (sourceNodeRef.current) {
         sourceNodeRef.current.stop();
@@ -38,12 +38,44 @@ export default function SoundPlayer({ name, audioSrc, date, place }) {
   }, [audioSrc]);
 
   const loadAudio = async () => {
+    if (hasLoaded) return;
+    
     setIsLoading(true);
+    setLoadProgress(0);
+    
     try {
       const response = await fetch(audioSrc);
-      const arrayBuffer = await response.arrayBuffer();
+      const contentLength = response.headers.get('content-length');
+      const total = parseInt(contentLength, 10);
+      
+      let loaded = 0;
+      const reader = response.body.getReader();
+      const chunks = [];
+
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
+        
+        chunks.push(value);
+        loaded += value.length;
+        
+        if (total) {
+          setLoadProgress(Math.round((loaded / total) * 100));
+        }
+      }
+
+      const arrayBuffer = new Uint8Array(loaded);
+      let position = 0;
+      for (const chunk of chunks) {
+        arrayBuffer.set(chunk, position);
+        position += chunk.length;
+      }
+
       audioBufferRef.current =
-        await audioContextRef.current.decodeAudioData(arrayBuffer);
+        await audioContextRef.current.decodeAudioData(arrayBuffer.buffer);
+      
+      setHasLoaded(true);
     } catch (err) {
       console.error('Error loading audio:', err);
     } finally {
@@ -107,11 +139,19 @@ export default function SoundPlayer({ name, audioSrc, date, place }) {
     }, FADE_TIME * 1000);
   };
 
-  const togglePlay = () => {
-    if (isPlaying) stopSound();
-    else playSound();
-
-    setIsPlaying(!isPlaying);
+  const togglePlay = async () => {
+    if (isPlaying) {
+      stopSound();
+      setIsPlaying(false);
+    } else {
+      if (!hasLoaded) {
+        await loadAudio();
+      }
+      if (audioBufferRef.current) {
+        playSound();
+        setIsPlaying(true);
+      }
+    }
   };
 
   const handleVolumeChange = (e) => {
@@ -143,7 +183,10 @@ export default function SoundPlayer({ name, audioSrc, date, place }) {
           disabled={isLoading}
         >
           {isLoading ? (
-            <div className="spinner"></div>
+            <div className="loading-indicator">
+              <div className="spinner"></div>
+              <span className="load-percentage">{loadProgress}%</span>
+            </div>
           ) : isPlaying ? (
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <rect x="4" y="3" width="4" height="14" fill="currentColor" />
