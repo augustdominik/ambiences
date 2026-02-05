@@ -12,6 +12,7 @@ export default function SoundPlayer({ name, audioSrc, date, place }) {
   const audioBufferRef = useRef(null);
   const sourceNodeRef = useRef(null);
   const gainNodeRef = useRef(null);
+  const fadeTimeoutRef = useRef(null);
 
   const FADE_TIME = 2.5; // seconds
 
@@ -93,6 +94,12 @@ export default function SoundPlayer({ name, audioSrc, date, place }) {
       ctx.resume();
     }
 
+    // Clear any pending fade-out timeout
+    if (fadeTimeoutRef.current) {
+      clearTimeout(fadeTimeoutRef.current);
+      fadeTimeoutRef.current = null;
+    }
+
     if (sourceNodeRef.current) {
       sourceNodeRef.current.stop();
     }
@@ -120,6 +127,7 @@ export default function SoundPlayer({ name, audioSrc, date, place }) {
     if (!ctx || !sourceNodeRef.current) return;
 
     const now = ctx.currentTime;
+    const sourceToStop = sourceNodeRef.current;
 
     // Fade out
     gainNodeRef.current.gain.cancelScheduledValues(now);
@@ -133,9 +141,12 @@ export default function SoundPlayer({ name, audioSrc, date, place }) {
     );
 
     // Stop after fade
-    setTimeout(() => {
-      sourceNodeRef.current?.stop();
-      sourceNodeRef.current = null;
+    fadeTimeoutRef.current = setTimeout(() => {
+      if (sourceNodeRef.current === sourceToStop) {
+        sourceToStop?.stop();
+        sourceNodeRef.current = null;
+      }
+      fadeTimeoutRef.current = null;
     }, FADE_TIME * 1000);
   };
 
@@ -159,10 +170,18 @@ export default function SoundPlayer({ name, audioSrc, date, place }) {
     setVolume(newVolume);
 
     if (gainNodeRef.current && isPlaying) {
-      gainNodeRef.current.gain.setTargetAtTime(
+      const ctx = audioContextRef.current;
+      const now = ctx.currentTime;
+      
+      // Cancel any scheduled ramps (like fade-in) to prevent jitter
+      gainNodeRef.current.gain.cancelScheduledValues(now);
+      gainNodeRef.current.gain.setValueAtTime(
+        gainNodeRef.current.gain.value,
+        now
+      );
+      gainNodeRef.current.gain.linearRampToValueAtTime(
         linearToLog(newVolume),
-        audioContextRef.current.currentTime,
-        0.05
+        now + 0.1
       );
     }
   };
