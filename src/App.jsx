@@ -7,24 +7,31 @@ function App() {
 
   const sounds = [
     {
+      id: 0,
+      name: 'Crispy crusty footsteps in the snow',
+      src: `${baseUrl}sounds/crispy_crusty_walk_in_the_snow.WAV`,
+      date: 'February 7th, 2026',
+      place: 'Helsingør'
+    },
+    {
       id: 1,
       name: 'Sizzling Lasagna',
       src: `${baseUrl}sounds/sizzling_lasagna.WAV`,
-      date: 'January 30, 2026',
+      date: 'January 30th, 2026',
       place: 'Odense'
     },
     {
       id: 2,
       name: 'Odense Å 1',
       src: `${baseUrl}sounds/odense_aa1_cleaned.WAV`,
-      date: 'January 30, 2026',
+      date: 'January 30th, 2026',
       place: 'Odense'
     },
     {
       id: 3,
       name: 'Odense Å 2',
       src: `${baseUrl}sounds/odense_aa2_cleaned.WAV`,
-      date: 'January 30, 2026',
+      date: 'January 30th, 2026',
       place: 'Odense'
     },
   ];
@@ -46,7 +53,7 @@ function App() {
           />
         ))}
       </div>
-      <Newsletter />
+      {/* <Newsletter /> */}
     </div>
   )
 }
