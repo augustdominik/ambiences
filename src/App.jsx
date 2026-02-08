@@ -7,6 +7,13 @@ function App() {
 
   const sounds = [
     {
+      id: -1,
+      name: 'Crispy leaves and birds at Esrum Sø',
+      src: `${baseUrl}sounds/zoom_i_træ_blade_fugle_esrum_sø.WAV`,
+      date: 'February 8th, 2026',
+      place: 'Esrum Sø'
+    },
+    {
       id: 0,
       name: 'Crispy crusty footsteps in the snow',
       src: `${baseUrl}sounds/crispy_crusty_walk_in_the_snow.WAV`,
