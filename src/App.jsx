@@ -8,7 +8,7 @@ function App() {
   const sounds = [
     {
       id: -1,
-      name: 'Crispy leaves and birds at Esrum Sø',
+      name: 'Crispy leaves and birds at Esrum Sø.',
       src: `${baseUrl}sounds/zoom_i_træ_blade_fugle_esrum_sø.WAV`,
       date: 'February 8th, 2026',
       place: 'Esrum Sø'
