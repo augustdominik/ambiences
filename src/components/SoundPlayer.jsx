@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import './SoundPlayer.css';
 
-export default function SoundPlayer({ name, audioSrc, date, place }) {
+export default function SoundPlayer({ id, name, audioSrc, date, place, onPlayingStateChange, globalPaused }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5);
   const [isLoading, setIsLoading] = useState(false);
@@ -154,6 +154,7 @@ export default function SoundPlayer({ name, audioSrc, date, place }) {
     if (isPlaying) {
       stopSound();
       setIsPlaying(false);
+      onPlayingStateChange?.(id, false);
     } else {
       if (!hasLoaded) {
         await loadAudio();
@@ -161,9 +162,30 @@ export default function SoundPlayer({ name, audioSrc, date, place }) {
       if (audioBufferRef.current) {
         playSound();
         setIsPlaying(true);
+        onPlayingStateChange?.(id, true);
       }
     }
   };
+
+  // Handle global pause/resume from Media Session API
+  useEffect(() => {
+    if (!isPlaying) return; // Only affect currently playing sounds
+
+    const ctx = audioContextRef.current;
+    if (!ctx) return;
+
+    if (globalPaused) {
+      // Suspend audio context to pause
+      if (ctx.state === 'running') {
+        ctx.suspend();
+      }
+    } else {
+      // Resume audio context
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+    }
+  }, [globalPaused, isPlaying]);
 
   const handleVolumeChange = (e) => {
     const newVolume = parseFloat(e.target.value);

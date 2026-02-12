@@ -1,9 +1,12 @@
+import { useState, useEffect } from 'react'
 import SoundPlayer from './components/SoundPlayer'
 import Newsletter from './components/Newsletter'
 import './App.css'
 
 function App() {
   const baseUrl = import.meta.env.BASE_URL;
+  const [playingStates, setPlayingStates] = useState({});
+  const [globalPaused, setGlobalPaused] = useState(false);
 
   const sounds = [
     {
@@ -43,6 +46,55 @@ function App() {
     },
   ];
 
+  // Update Media Session API when playing states change
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return;
+
+    const playingSounds = Object.entries(playingStates)
+      .filter(([_, isPlaying]) => isPlaying)
+      .map(([id, _]) => sounds.find(s => s.id === parseInt(id)))
+      .filter(Boolean);
+
+    const playingCount = playingSounds.length;
+
+    if (playingCount > 0) {
+      // Set metadata
+      const metadata = {
+        title: playingCount === 1 
+          ? playingSounds[0].name 
+          : `${playingCount} Ambiences Playing`,
+        artist: playingCount === 1
+          ? `${playingSounds[0].place} • ${playingSounds[0].date}`
+          : playingSounds.map(s => s.name).join(', '),
+        album: "August's Ambiences",
+      };
+
+      navigator.mediaSession.metadata = new MediaMetadata(metadata);
+
+      // Set playback state
+      navigator.mediaSession.playbackState = globalPaused ? 'paused' : 'playing';
+
+      // Set up action handlers
+      navigator.mediaSession.setActionHandler('play', () => {
+        setGlobalPaused(false);
+      });
+
+      navigator.mediaSession.setActionHandler('pause', () => {
+        setGlobalPaused(true);
+      });
+    } else {
+      navigator.mediaSession.playbackState = 'none';
+      navigator.mediaSession.metadata = null;
+    }
+  }, [playingStates, globalPaused, sounds]);
+
+  const handlePlayingStateChange = (id, isPlaying) => {
+    setPlayingStates(prev => ({
+      ...prev,
+      [id]: isPlaying
+    }));
+  };
+
   return (
     <div className="app">
       <header>
@@ -53,10 +105,13 @@ function App() {
         {sounds.map((sound) => (
           <SoundPlayer
             key={sound.id}
+            id={sound.id}
             name={sound.name}
             audioSrc={sound.src}
             date={sound.date}
             place={sound.place}
+            onPlayingStateChange={handlePlayingStateChange}
+            globalPaused={globalPaused}
           />
         ))}
       </div>
