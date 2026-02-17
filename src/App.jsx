@@ -7,11 +7,20 @@ function App() {
   const baseUrl = import.meta.env.BASE_URL;
   const [playingStates, setPlayingStates] = useState({});
   const [globalPaused, setGlobalPaused] = useState(false);
+  const [loveClickCount, setLoveClickCount] = useState(0);
+  const [secretUnlocked, setSecretUnlocked] = useState(false);
 
   const sounds = [
+    ...(secretUnlocked ? [{
+      id: -2,
+      name: '✨ hemmelig ambience til babe 🤫',
+      src: `${baseUrl}sounds/til_babe.WAV`,
+      date: 'Unlocked with love',
+      place: 'radonrummet'
+    }] : []),
     {
       id: -1,
-      name: 'Crispy leaves and birds at Esrum Sø.',
+      name: 'Crispy leaves and birds at Esrum Sø',
       src: `${baseUrl}sounds/zoom_i_træ_blade_fugle_esrum_sø.WAV`,
       date: 'February 8th, 2026',
       place: 'Esrum Sø'
@@ -60,8 +69,8 @@ function App() {
     if (playingCount > 0) {
       // Set metadata
       const metadata = {
-        title: playingCount === 1 
-          ? playingSounds[0].name 
+        title: playingCount === 1
+          ? playingSounds[0].name
           : `${playingCount} Ambiences Playing`,
         artist: playingCount === 1
           ? `${playingSounds[0].place} • ${playingSounds[0].date}`
@@ -95,11 +104,20 @@ function App() {
     }));
   };
 
+  const handleLoveClick = () => {
+    const newCount = loveClickCount + 1;
+    setLoveClickCount(newCount);
+
+    if (newCount === 3) {
+      setSecretUnlocked(true);
+    }
+  };
+
   return (
     <div className="app">
       <header>
         <h1>August's Ambiences</h1>
-        <p>a diary of sounds - recorded with love</p>
+        <p>a diary of sounds - recorded with <span onClick={handleLoveClick} style={{ cursor: 'pointer' }}>love</span></p>
       </header>
       <div className="sound-grid">
         {sounds.map((sound) => (
