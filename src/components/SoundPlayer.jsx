@@ -10,11 +10,15 @@ export default function SoundPlayer({ id, name, audioSrc, date, place, onPlaying
 
   const audioContextRef = useRef(null);
   const audioBufferRef = useRef(null);
-  const sourceNodeRef = useRef(null);
+  const activeSourcesRef = useRef([]); // [{ source, voiceGain }]
   const gainNodeRef = useRef(null);
   const fadeTimeoutRef = useRef(null);
+  const loopTimeoutRef = useRef(null);
+  const isPlayingRef = useRef(false);
 
-  const FADE_TIME = 2.5; // seconds
+  const FADE_TIME = 4.5; // seconds
+  const CROSSFADE_TIME = 5; // seconds for loop crossfade
+  const SCHEDULE_AHEAD = 0.5; // seconds to schedule next loop before it's needed
 
   // Convert linear slider value to logarithmic gain value
   const linearToLog = (value) => {
@@ -31,8 +35,8 @@ export default function SoundPlayer({ id, name, audioSrc, date, place, onPlaying
     gainNodeRef.current.connect(audioContextRef.current.destination);
 
     return () => {
-      if (sourceNodeRef.current) {
-        sourceNodeRef.current.stop();
+      for (const { source } of activeSourcesRef.current) {
+        try { source.stop(); } catch {}
       }
       audioContextRef.current?.close();
     };
@@ -40,27 +44,27 @@ export default function SoundPlayer({ id, name, audioSrc, date, place, onPlaying
 
   const loadAudio = async () => {
     if (hasLoaded) return;
-    
+
     setIsLoading(true);
     setLoadProgress(0);
-    
+
     try {
       const response = await fetch(audioSrc);
       const contentLength = response.headers.get('content-length');
       const total = parseInt(contentLength, 10);
-      
+
       let loaded = 0;
       const reader = response.body.getReader();
       const chunks = [];
 
       while (true) {
         const { done, value } = await reader.read();
-        
+
         if (done) break;
-        
+
         chunks.push(value);
         loaded += value.length;
-        
+
         if (total) {
           setLoadProgress(Math.round((loaded / total) * 100));
         }
@@ -75,13 +79,47 @@ export default function SoundPlayer({ id, name, audioSrc, date, place, onPlaying
 
       audioBufferRef.current =
         await audioContextRef.current.decodeAudioData(arrayBuffer.buffer);
-      
+
       setHasLoaded(true);
     } catch (err) {
       console.error('Error loading audio:', err);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const scheduleLoop = (startTime) => {
+    const ctx = audioContextRef.current;
+    const buffer = audioBufferRef.current;
+    if (!ctx || !buffer || !isPlayingRef.current) return;
+
+    const duration = buffer.duration;
+    const crossfade = Math.min(CROSSFADE_TIME, duration / 3);
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const voiceGain = ctx.createGain();
+    source.connect(voiceGain);
+    voiceGain.connect(gainNodeRef.current);
+
+    // Fade in at loop start, fade out at loop end
+    voiceGain.gain.setValueAtTime(0, startTime);
+    voiceGain.gain.linearRampToValueAtTime(1, startTime + crossfade);
+    voiceGain.gain.setValueAtTime(1, startTime + duration - crossfade);
+    voiceGain.gain.linearRampToValueAtTime(0, startTime + duration);
+
+    source.start(startTime);
+    source.stop(startTime + duration);
+
+    activeSourcesRef.current.push({ source, voiceGain });
+
+    // Fire the next schedule SCHEDULE_AHEAD seconds early so Web Audio has precise timing
+    const nextStart = startTime + duration - crossfade;
+    const delay = (nextStart - ctx.currentTime - SCHEDULE_AHEAD) * 1000;
+    loopTimeoutRef.current = setTimeout(() => {
+      activeSourcesRef.current = activeSourcesRef.current.filter(s => s.source !== source);
+      scheduleLoop(nextStart);
+    }, Math.max(0, delay));
   };
 
   const playSound = () => {
@@ -94,22 +132,24 @@ export default function SoundPlayer({ id, name, audioSrc, date, place, onPlaying
       ctx.resume();
     }
 
-    // Clear any pending fade-out timeout
+    // Clear any pending timeouts
     if (fadeTimeoutRef.current) {
       clearTimeout(fadeTimeoutRef.current);
       fadeTimeoutRef.current = null;
     }
-
-    if (sourceNodeRef.current) {
-      sourceNodeRef.current.stop();
+    if (loopTimeoutRef.current) {
+      clearTimeout(loopTimeoutRef.current);
+      loopTimeoutRef.current = null;
     }
 
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    source.loop = true;
-    source.connect(gainNodeRef.current);
+    // Stop all active sources
+    for (const { source } of activeSourcesRef.current) {
+      try { source.stop(); } catch {}
+    }
+    activeSourcesRef.current = [];
+    isPlayingRef.current = true;
 
-    // Fade in
+    // Fade in main gain
     const now = ctx.currentTime;
     gainNodeRef.current.gain.cancelScheduledValues(now);
     gainNodeRef.current.gain.setValueAtTime(0, now);
@@ -118,18 +158,23 @@ export default function SoundPlayer({ id, name, audioSrc, date, place, onPlaying
       now + FADE_TIME
     );
 
-    source.start();
-    sourceNodeRef.current = source;
+    scheduleLoop(now);
   };
 
   const stopSound = () => {
     const ctx = audioContextRef.current;
-    if (!ctx || !sourceNodeRef.current) return;
+    if (!ctx) return;
+
+    isPlayingRef.current = false;
+
+    if (loopTimeoutRef.current) {
+      clearTimeout(loopTimeoutRef.current);
+      loopTimeoutRef.current = null;
+    }
 
     const now = ctx.currentTime;
-    const sourceToStop = sourceNodeRef.current;
 
-    // Fade out
+    // Fade out main gain
     gainNodeRef.current.gain.cancelScheduledValues(now);
     gainNodeRef.current.gain.setValueAtTime(
       gainNodeRef.current.gain.value,
@@ -140,12 +185,13 @@ export default function SoundPlayer({ id, name, audioSrc, date, place, onPlaying
       now + FADE_TIME
     );
 
-    // Stop after fade
+    // Stop all sources after fade
+    const sourcesToStop = [...activeSourcesRef.current];
     fadeTimeoutRef.current = setTimeout(() => {
-      if (sourceNodeRef.current === sourceToStop) {
-        sourceToStop?.stop();
-        sourceNodeRef.current = null;
+      for (const { source } of sourcesToStop) {
+        try { source.stop(); } catch {}
       }
+      activeSourcesRef.current = [];
       fadeTimeoutRef.current = null;
     }, FADE_TIME * 1000);
   };
@@ -194,7 +240,7 @@ export default function SoundPlayer({ id, name, audioSrc, date, place, onPlaying
     if (gainNodeRef.current && isPlaying) {
       const ctx = audioContextRef.current;
       const now = ctx.currentTime;
-      
+
       // Cancel any scheduled ramps (like fade-in) to prevent jitter
       gainNodeRef.current.gain.cancelScheduledValues(now);
       gainNodeRef.current.gain.setValueAtTime(

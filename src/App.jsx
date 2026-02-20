@@ -20,6 +20,20 @@ function App() {
     }] : []),
     {
       id: -1,
+      name: 'Cold and windy winter night in the forest',
+      src: `${baseUrl}sounds/I den mørke vinterskov.WAV`,
+      date: 'February 20th, 2026',
+      place: 'Odense'
+    },
+    {
+      id: -1,
+      name: 'Out the window',
+      src: `${baseUrl}sounds/i helsingør ud af vinduet.WAV`,
+      date: 'February 8th, 2026',
+      place: 'Helsingør'
+    },
+    {
+      id: -1,
       name: 'Crispy leaves and birds at Esrum Sø',
       src: `${baseUrl}sounds/zoom_i_træ_blade_fugle_esrum_sø.WAV`,
       date: 'February 8th, 2026',
